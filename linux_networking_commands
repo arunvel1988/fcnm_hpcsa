@@ -1,0 +1,315 @@
+######################################################################################################
+########### networking commands
+######################################################################################################
+ip addr show //// ifconfig	View network interfaces and IP addresses
+
+
+
+ip route show ///// route -n	View routing table
+
+
+
+ping <hostname_or_ip>	Ping a host
+
+traceroute <hostname_or_ip>	Traceroute to a host
+
+nslookup <hostname>	DNS lookup
+
+dig <hostname>	DNS lookup
+
+
+##########################################################################################################
+############### managing interfaces
+######################################################################################################
+
+ip link set dev <interface> up	Bring an interface up
+
+
+ifconfig <interface> up
+
+
+ip link set dev <interface> down
+
+ifconfig <interface> down
+
+
+ip addr add <ip_address>/<subnet_mask> dev <interface>
+
+ifconfig <interface> <ip_address> netmask <subnet_mask>
+
+
+
+ip addr del <ip_address>/<subnet_mask> dev <interface>
+
+
+##########################################################################################################
+############### DNS
+######################################################################################################
+
+cat /etc/resolv.conf	View DNS configuration
+
+echo "nameserver <dns_server_ip>" >> /etc/resolv.conf	Add a DNS server
+
+nano /etc/resolv.conf	Edit DNS configuration
+
+##########################################################################################################
+############### Network Manager cli
+######################################################################################################
+
+
+nmcli general status	Show NetworkManager status
+
+
+nmcli device status	Show all network interfaces
+
+nmcli connection show	Show all network connections
+
+
+nmcli connection show <connection_name>	Show details of a specific connection
+
+
+nmcli connection up <connection_name>	Bring a connection up
+
+
+nmcli connection down <connection_name>	Bring a connection down
+
+nmcli connection add type ethernet ifname <interface> con-name <connection_name> ip4 <ip_address>/<subnet_mask> gw4 <gateway_ip>	Add a new static IP connection
+
+nmcli connection modify <connection_name> ipv4.dns "<dns_server_ip>"	Add a DNS server to a connection
+
+
+
+
+
+##########################################################################################################
+############### Network Manager ui
+######################################################################################################
+
+
+(nmtui)	nmtui	Start NetworkManager Text User Interface
+
+##########################################################################################################
+############### Network Troubleshooting
+######################################################################################################
+
+
+ip -s link	Check network interface statistics
+
+
+ifconfig -a	Check network interface statistics
+
+
+tcpdump -i <interface>	Monitor network traffic
+
+
+
+ip neigh show	Check ARP cache
+
+
+arp -n	Check ARP cache
+
+
+
+ip -s -s neigh flush all	Flush ARP cache
+
+
+netstat -tunap	Show active connections
+
+
+netstat -tuln	Display listening ports
+
+
+netstat -s	Display network statistics
+
+
+
+
+
+##########################################################################################################
+############### Routing capabilities - Linux
+######################################################################################################
+
+ip route add default via <gateway_ip>	Add a default gateway
+
+
+ip route del default	Delete a default gateway
+
+ip route add <destination_network>/<subnet_mask> via <gateway_ip>	Add a static route
+
+
+ip route del <destination_network>/<subnet_mask>	Delete a static route
+
+
+
+##########################################################################################################
+############### ip commands
+######################################################################################################
+
+ip link set dev <interface> mtu <mtu_size>	Set MTU size
+ip link set dev eth0 mtu 1400
+
+
+
+ip neigh show	Show neighbors (ARP cache)
+
+
+ip neigh add <ip_address> lladdr <mac_address> dev <interface>	Add a permanent ARP entry
+ip neigh add 192.168.1.10 lladdr aa:bb:cc:dd:ee:ff dev eth0
+
+
+
+ip neigh del <ip_address> dev <interface>	Delete an ARP entry
+ip neigh del 192.168.1.10 dev eth0
+
+
+
+
+##########################################################################################################
+############### firewall config - centos/rocky
+######################################################################################################
+
+
+systemctl status firewalld	Check firewall status
+
+
+systemctl start firewalld	Start firewall
+systemctl stop firewalld	Stop firewall
+
+systemctl enable firewalld	Enable firewall on boot
+firewall-cmd --zone=public --add-port=<port>/tcp --permanent	Add a firewall rule
+
+
+firewall-cmd --zone=public --add-port=80/tcp --permanent
+
+############ block port 80 ###########################
+firewall-cmd --zone=public --add-rich-rule='rule family="ipv4" port protocol="tcp" port="80" reject'
+firewall-cmd --reload
+
+
+##############################################
+
+############### unblocking ###################################################################################################
+firewall-cmd --zone=public --remove-rich-rule='rule family="ipv4" port protocol="tcp" port="80" reject'
+firewall-cmd --reload
+#############################################################################################################################
+
+firewall-cmd --reload	Reload firewall configuration
+
+
+# Example: Block access to website example.com
+sudo iptables -I INPUT -s 196.1.1.30 -j DROP
+sudo iptables -I OUTPUT -d 196.1.1.30 -j DROP
+
+##############################################################
+
+to remove rule
+
+###############################################################
+
+-D (Direct Match)
+sudo iptables -D INPUT -s 196.1.1.30 -j DROP
+sudo iptables -D OUTPUT -d 196.1.1.30 -j DROP
+
+
+
+sudo iptables-save
+
+
+sudo iptables-save > /etc/sysconfig/iptables
+
+
+
+sudo yum install iptables-persistent
+
+
+sudo service iptables-persistent save
+
+
+sudo iptables-restore < /etc/sysconfig/iptables
+
+
+
+sudo iptables -L -v -n --line-numbers
+sudo iptables -D INPUT 1
+sudo iptables -D OUTPUT 1
+
+
+sudo iptables -L -v -n --line-numbers
+
+
+
+
+###################################################################################################################################################################
+Ubuntu
+##############################################################################################################################################################
+
+# Check UFW status
+sudo ufw status
+
+# Enable UFW (start the firewall)
+sudo ufw enable
+
+# Disable UFW (stop the firewall)
+sudo ufw disable
+
+# Allow traffic on port 80 (TCP)
+sudo ufw allow 80/tcp
+
+# Block traffic on port 80 (TCP)
+sudo ufw deny 80/tcp
+
+# Reload UFW (typically not needed, as it auto-applies changes, but can be done)
+sudo ufw reload
+
+
+# Block access to a specific IP (cdac.in) using UFW
+sudo ufw deny from 196.1.1.30
+
+# Block outgoing traffic to a specific IP (cdac.in) using UFW
+sudo ufw deny out to 196.1.1.30
+sudo ufw status numbered
+sudo ufw delete deny out to 196.1.1.30
+
+
+
+
+# Alternatively, block access to a specific IP using iptables
+sudo iptables -I INPUT -s 196.1.1.30 -j DROP
+sudo iptables -I OUTPUT -d 196.1.1.30 -j DROP
+
+
+# Block an entire subnet
+sudo iptables -I INPUT -s 196.1.1.0/24 -j DROP
+sudo iptables -I OUTPUT -d 196.1.1.0/24 -j DROP
+
+sudo iptables -L -n --line-numbers
+
+# Remove the INPUT rule
+sudo iptables -D INPUT 1
+
+# Remove the OUTPUT rule
+sudo iptables -D OUTPUT 1
+
+
+
+# Block a specific range of IP addresses
+sudo iptables -I INPUT -m iprange --src-range 196.1.1.30-196.1.1.50 -j DROP
+sudo iptables -I OUTPUT -m iprange --dst-range 196.1.1.30-196.1.1.50 -j DROP
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
