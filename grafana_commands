@@ -106,3 +106,116 @@ sudo systemctl start grafana-server
 
 
 1860 = dashboard import
+
+
+wget https://github.com/prometheus/alertmanager/releases/download/v0.25.0/alertmanager-0.25.0.linux-amd64.tar.gz
+
+tar -xvzf alertmanager-0.25.0.linux-amd64.tar.gz
+
+
+mv alertmanager-0.25.0.linux-amd64 alertmanager
+
+
+sudo mv alertmanager/alertmanager /usr/local/bin/
+sudo mv alertmanager/amtool /usr/local/bin/
+
+sudo mkdir -p /etc/alertmanager
+sudo nano /etc/alertmanager/alertmanager.yml
+global:
+  resolve_timeout: 5m
+ 
+
+route:
+  group_by: ['alertname']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: email_alert
+receivers:
+- name: email_alert
+  email_configs:
+  - to: csemanit2015@gmail.com
+    from: aryan.arunachalam@gmail.com
+    smarthost: smtp.gmail.com:587
+    auth_username: aryan.arunachalam@gmail.com
+    auth_identity: aryan.arunachalam@gmail.com
+    auth_password: qzqyqmbeymmjtbbk
+
+
+sudo mkdir -p /var/lib/alertmanager/data
+sudo chown arun:arun /var/lib/alertmanager/data
+
+
+sudo nano /etc/systemd/system/alertmanager.service
+
+
+[Unit]
+Description=Alertmanager
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=arun
+ExecStart=/usr/local/bin/alertmanager --config.file=/etc/alertmanager/alertmanager.yml --storage.path=/var/lib/alertmanager/data
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+
+
+
+sudo systemctl daemon-reload
+
+
+sudo systemctl start alertmanager
+
+sudo systemctl enable alertmanager
+
+
+
+sudo nano /etc/prometheus/prometheus.yml
+
+
+
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'node_exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'localhost:9093'  # Port where Alertmanager is running
+
+rule_files:
+  - "/etc/prometheus/alert.rules.yml"  # Add your alerting rules file
+
+
+
+  sudo touch /etc/prometheus/alert.rules.yml
+
+sudo nano /etc/prometheus/alert.rules.yml
+
+
+groups:
+  - name: node_down
+    rules:
+      - alert: NodeDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance {{ $labels.instance }} is down"
+          description: "{{ $labels.instance }} of job {{ $labels.job }} has been down for more than 5 minutes."
+
+
+
+sudo systemctl restart prometheus
+
+
+
