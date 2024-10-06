@@ -1,0 +1,40 @@
+Direct Memory Access: RDMA enables one computer to access the memory of another computer directly, bypassing the CPU. This is done through specialized network interface cards (NICs) that support RDMA.
+
+Network Protocols: RDMA operates over various network protocols, such as InfiniBand, RoCE (RDMA over Converged Ethernet), and iWARP. Each protocol has its specifications and requirements.
+
+Zero-Copy Networking: With RDMA, data can be transferred between two nodes without copying it to the application buffer first. This is known as zero-copy networking and helps reduce CPU overhead and improve throughput.
+
+Memory Registration: Before initiating an RDMA operation, the application must register the memory buffers it intends to use. This involves notifying the RDMA NIC about the memory addresses, which allows the NIC to access them directly.
+
+RDMA Operations: RDMA supports various operations, such as:
+
+Read: One node can read data from the memory of another node directly.
+Write: One node can write data to the memory of another node directly.
+Send/Receive: Standard message-passing operations similar to traditional networking.
+Offloading Processing: The RDMA-capable NIC offloads much of the processing from the CPU, allowing for high-throughput and low-latency communication, making it suitable for high-performance computing (HPC) and data-intensive applications.
+
+
+
+iWARP (Internet Wide Area RDMA Protocol)
+iWARP is a protocol that enables Remote Direct Memory Access (RDMA) over standard Ethernet networks. It allows applications to directly access memory across a network, improving data transfer speeds and reducing latency. Here’s a detailed overview:
+
+How iWARP Works
+Protocol Stack: iWARP operates on top of the standard TCP/IP stack, allowing it to function over existing Ethernet infrastructure without requiring specialized hardware. This makes it easier to integrate into existing networks.
+
+RDMA Operations: iWARP supports several RDMA operations, including:
+
+RDMA Read: Allows a remote node to read data from the local memory of another node.
+RDMA Write: Permits a remote node to write data directly into the local memory of another node.
+Send/Receive: These operations can be used for message-passing between applications.
+Zero-Copy Data Transfer: Similar to other RDMA technologies, iWARP enables zero-copy data transfers, meaning that data can be moved directly between application buffers in different nodes without CPU intervention. This results in lower latency and reduced CPU usage.
+
+Memory Registration: Before performing RDMA operations, the application must register its memory regions with the iWARP-capable network interface card (NIC). This allows the NIC to access those memory regions directly.
+
+Connection-Oriented: iWARP is connection-oriented and uses TCP as its transport layer, which provides reliability, flow control, and congestion management. This is particularly advantageous for long-distance data transfers.
+
+Advantages of iWARP
+Compatibility: Since iWARP runs over standard Ethernet and uses TCP, it can leverage existing Ethernet infrastructure and doesn't require specialized hardware, making it easier to deploy in various environments.
+
+Performance: iWARP can achieve high throughput and low latency, making it suitable for high-performance computing applications and data centers.
+
+Flexibility: It can work over different types of Ethernet networks, including both traditional Ethernet and more modern configurations.
